@@ -2,6 +2,7 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * In-memory list of todo tasks.
@@ -41,6 +42,52 @@ public class TodoList {
         }
         tasks.remove(index);
         return true;
+    }
+
+    /**
+     * Marks the task at the given zero-based index as completed.
+     *
+     * @param index the index of the task to mark
+     * @return {@code true} if the task was marked, {@code false} if the index
+     *         is out of bounds
+     */
+    public boolean markDone(int index) {
+        if (index < 0 || index >= tasks.size()) {
+            return false;
+        }
+        tasks.get(index).markDone();
+        return true;
+    }
+
+    /**
+     * Removes all tasks from the list.
+     */
+    public void clear() {
+        tasks.clear();
+    }
+
+    /**
+     * Returns the tasks whose text contains the given query, ignoring case.
+     * A {@code null} or blank query matches nothing.
+     *
+     * @param query the text to search for
+     * @return a new list with the matching tasks
+     */
+    public List<Task> search(String query) {
+        List<Task> matches = new ArrayList<>();
+        if (query == null) {
+            return matches;
+        }
+        String needle = query.trim().toLowerCase(Locale.ROOT);
+        if (needle.isEmpty()) {
+            return matches;
+        }
+        for (Task task : tasks) {
+            if (task.getText().toLowerCase(Locale.ROOT).contains(needle)) {
+                matches.add(task);
+            }
+        }
+        return matches;
     }
 
     /**
