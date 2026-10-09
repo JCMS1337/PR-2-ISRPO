@@ -48,11 +48,14 @@ jobs:
         run: |
           VERSION="${{ steps.project.outputs.version }}"
           URL="https://maven.pkg.github.com/JCMS1337/PR-2-ISRPO/org/example/todo-app/${VERSION}/todo-app-${VERSION}.pom"
-          CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+          # -L follows the redirect GitHub Packages returns for an existing
+          # artifact; treat either that redirect (302) or the final response
+          # (200) as "already published". Non-existent versions yield 404.
+          CODE=$(curl -sL -o /dev/null -w '%{http_code}' \
             -H "Authorization: Bearer ${GITHUB_TOKEN}" \
             "$URL")
           echo "Maven registry responded with HTTP ${CODE} for ${URL}"
-          if [ "${CODE}" = "200" ]; then
+          if [ "${CODE}" = "200" ] || [ "${CODE}" = "302" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
             echo "Version ${VERSION} is already published - skipping."
           else
