@@ -1,9 +1,12 @@
 plugins {
     id 'java'
+    id 'application'
+    id 'maven-publish'
+    id 'com.gradleup.shadow' version '8.3.11'
 }
 
 group = 'org.example'
-version = '1.0-SNAPSHOT'
+version = findProperty('version') ?: '0.1.0'
 
 repositories {
     mavenCentral()
@@ -18,6 +21,39 @@ dependencies {
 java {
     sourceCompatibility = '23'
     targetCompatibility = '23'
+}
+
+application {
+    mainClass = 'org.example.TodoApp'
+}
+
+shadowJar {
+    archiveBaseName = 'todo-app'
+    archiveClassifier = ''
+    archiveVersion = project.version.toString()
+    mergeServiceFiles()
+}
+
+tasks.jar {
+    enabled = false
+}
+
+tasks.build {
+    dependsOn shadowJar
+}
+
+// The application plugin's distribution tasks consume the shadow jar as the
+// project artifact, so they must depend on it explicitly.
+tasks.named('startScripts') {
+    dependsOn 'shadowJar'
+}
+
+tasks.named('distTar') {
+    dependsOn 'shadowJar'
+}
+
+tasks.named('distZip') {
+    dependsOn 'shadowJar'
 }
 
 test {
