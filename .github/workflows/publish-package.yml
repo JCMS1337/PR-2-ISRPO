@@ -33,5 +33,32 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Read version
+        id: project
+        run: |
+          VERSION=$(grep -E '^version=' gradle.properties | head -n 1 | cut -d'=' -f2 | tr -d '[:space:]')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved version: $VERSION"
+
+      # GitHub Packages (Maven) is immutable: re-publishing an existing version
+      # fails with HTTP 409. Since this workflow runs after every successful CI
+      # on main (not only on version bumps), skip when the version is already there.
+      - name: Check if version is already published
+        id: check
+        run: |
+          VERSION="${{ steps.project.outputs.version }}"
+          URL="https://maven.pkg.github.com/JCMS1337/PR-2-ISRPO/org/example/todo-app/${VERSION}/todo-app-${VERSION}.pom"
+          CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            "$URL")
+          echo "Maven registry responded with HTTP ${CODE} for ${URL}"
+          if [ "${CODE}" = "200" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Version ${VERSION} is already published - skipping."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to GitHub Packages
+        if: steps.check.outputs.skip != 'true'
         run: ./gradlew publish
