@@ -8,10 +8,10 @@ import java.util.List;
  */
 public class TodoList {
 
-    private final List<String> tasks = new ArrayList<>();
+    private final List<Task> tasks = new ArrayList<>();
 
     /**
-     * Adds a task to the list. The task is trimmed first; {@code null},
+     * Adds a task to the list. The task text is trimmed first; {@code null},
      * empty and blank values are ignored.
      *
      * @param task the task text
@@ -25,7 +25,7 @@ public class TodoList {
         if (normalized.isEmpty()) {
             return false;
         }
-        return tasks.add(normalized);
+        return tasks.add(new Task(normalized));
     }
 
     /**
@@ -48,7 +48,7 @@ public class TodoList {
      *
      * @return a new list with the tasks
      */
-    public List<String> getAll() {
+    public List<Task> getAll() {
         return new ArrayList<>(tasks);
     }
 

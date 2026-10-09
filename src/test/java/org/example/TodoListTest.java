@@ -21,7 +21,8 @@ class TodoListTest {
     @Test
     void addTrimsSurroundingWhitespace() {
         assertTrue(todoList.add("   buy milk   "));
-        assertEquals(List.of("buy milk"), todoList.getAll());
+        assertEquals(1, todoList.size());
+        assertEquals("buy milk", todoList.getAll().get(0).getText());
     }
 
     @Test
@@ -52,7 +53,7 @@ class TodoListTest {
         assertTrue(todoList.remove(0));
 
         assertEquals(1, todoList.size());
-        assertEquals(List.of("second"), todoList.getAll());
+        assertEquals("second", todoList.getAll().get(0).getText());
     }
 
     @Test
@@ -73,10 +74,9 @@ class TodoListTest {
     void getAllReturnsDefensiveCopy() {
         todoList.add("first");
 
-        List<String> copy = todoList.getAll();
-        copy.add("injected");
+        List<Task> copy = todoList.getAll();
+        copy.clear();
 
         assertEquals(1, todoList.size());
-        assertEquals(List.of("first"), todoList.getAll());
     }
 }

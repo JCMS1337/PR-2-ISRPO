@@ -76,7 +76,7 @@ public class TodoApp {
     }
 
     private void handleList() {
-        List<String> tasks = todoList.getAll();
+        List<Task> tasks = todoList.getAll();
         if (tasks.isEmpty()) {
             System.out.println("No tasks.");
             return;
