@@ -7,7 +7,8 @@ import java.util.Scanner;
  * Simple console shell for {@link TodoList}.
  *
  * <p>Supported commands: {@code add <task>}, {@code remove <index>},
- * {@code list}, {@code exit}.</p>
+ * {@code done <index>}, {@code search <text>}, {@code clear}, {@code list},
+ * {@code exit}.</p>
  */
 public class TodoApp {
 
@@ -23,7 +24,7 @@ public class TodoApp {
      * @param scanner the input source
      */
     public void run(Scanner scanner) {
-        System.out.println("Todo app. Commands: add <task>, remove <index>, list, exit");
+        System.out.println("Todo app. Commands: add <task>, remove <index>, done <index>, search <text>, clear, list, exit");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
             if (line.isEmpty()) {
@@ -45,6 +46,15 @@ public class TodoApp {
                 break;
             case "remove":
                 handleRemove(parts.length > 1 ? parts[1] : null);
+                break;
+            case "done":
+                handleDone(parts.length > 1 ? parts[1] : null);
+                break;
+            case "search":
+                handleSearch(parts.length > 1 ? parts[1] : null);
+                break;
+            case "clear":
+                handleClear();
                 break;
             case "list":
                 handleList();
@@ -75,8 +85,37 @@ public class TodoApp {
         }
     }
 
+    private void handleDone(String rawIndex) {
+        Integer index = parseIndex(rawIndex);
+        if (index == null || !todoList.markDone(index)) {
+            System.out.println("Invalid index.");
+        } else {
+            System.out.println("Marked task at index " + index + " as done.");
+        }
+    }
+
+    private void handleSearch(String query) {
+        if (query == null) {
+            System.out.println("Usage: search <text>");
+            return;
+        }
+        List<Task> matches = todoList.search(query);
+        if (matches.isEmpty()) {
+            System.out.println("No tasks found.");
+            return;
+        }
+        for (Task task : matches) {
+            System.out.println(task);
+        }
+    }
+
+    private void handleClear() {
+        todoList.clear();
+        System.out.println("All tasks cleared.");
+    }
+
     private void handleList() {
-        List<String> tasks = todoList.getAll();
+        List<Task> tasks = todoList.getAll();
         if (tasks.isEmpty()) {
             System.out.println("No tasks.");
             return;
